@@ -1,0 +1,194 @@
+.. Project 2 documentation master file, created by
+   sphinx-quickstart on Sun Nov 12 14:32:49 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Project 2's:Minimum Cover documentation!
+===================================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+Code for Finding the Minimum Cover 
+**********************************
+	This code is used to find the minimum cover of a function. The user first enters the number of minterms and implicants in the function.
+	The  user is then asked to enter the minterm-implicant matrix format where the rows represent the minterms and the columnns represent the implicants.
+	The entry in the matrix are either zero or one depending on whether a particular minterm belongs to that implicant.
+
+Algorithm
+*********
+	The function matrix is scanned to count the number of ones in each column. 
+	The maximum is picked and the corresponding implicant is picked to appear in the Minimum Cover.
+	The minterms covered by that implicant are noted.
+	The second maximum column is chosen such that corresponding implicants contains minterms that haven't been covered yet.
+	And it goes on..
+
+
+Test Cases
+**********
+	1. Can be used for any number of minterms and implicants
+	2. Some sample function matrices:
+    		>>[[1,0,0],[0,1,0],[0,0,1]]
+    		>>[[1,0,0],[1,1,0],[0,1,1]]
+
+
+.. code-block :: Python
+
+	import numpy as np
+	import math
+	import string
+	import copy
+	import random
+
+	#----------Obtaining the table from the user----------
+
+	mnum=input("Enter the number of minterms")
+	
+	inum=input("Enter the number of implicants")
+	print "Start entering the table.The table should be such that the columns represent the implicants and the rows the minterms"
+	bigf=np.zeros([mnum,inum],dtype=np.int) 
+
+	bigf=input() #bigf is the table that the user inputs
+	r=len(bigf)
+        #-----------------ERROR HANDLING:If the user enters the table that has dimensions greater than the one they entered, it isn't considered---------
+	if r>mnum:
+    		print "The number of minterms entered exceeds the number of minterms entered in the beginning. Hence these won't be considered for processing"
+	print r
+	num_columns = np.shape(bigf)[1]
+	if r>mnum:
+    		print "The number of implicants entered exceeds the number of implicants entered in the beginning. Hence these won't be considered for processing"
+	print "The table that is going to be considered"
+	bif=np.zeros([1,inum],dtype=np.int)
+	for i in range(mnum):
+    		for j in range(inum):
+        		bif[0][j]= bigf[i][j]
+    		print bif
+    
+
+	#---------To find the number of ones occuring in each column------------------
+	i=0
+
+	zerc=[0]*inum
+	for i in range(inum):
+    		j=0
+    	for j in range(mnum):
+        	if bigf[j][i]==1:
+            	zerc[i]=zerc[i]+1
+       
+
+	print zerc # Zerc contains the number of ones in each column
+
+	#---------To find the minimum cover------------
+
+	status=np.zeros([mnum,1],dtype=np.int) 
+        # Status is the list that indicates whether some minterm is covered.
+        # Has entry in the form of zeroes and ones.
+	sel=np.zeros([mnum,1],dtype=np.int)
+	flag=0
+        
+	cop=zerc
+	s=zerc
+	print "zerc=",zerc
+	func="f="
+	cube=[None]*inum
+	for i in range(inum):
+    		cube[i]=string.lowercase[i] # Storing the literals in cube [i]
+
+       # While displaying the minimum cover, its displayed in the form of alphabets(a,b,c..) for better user readablity
+       
+	while flag==0:
+    
+    
+    		temp=max(cop)
+    		ind=zerc.index(temp)
+
+    		print temp
+    		print ind
+    
+    		i=0
+    		cover=0
+    		k=0
+    
+        	for i in range(mnum):
+        		if status[i]!=1:
+            
+            		cover=1
+        		if cover==1:
+            			if bigf[i][ind]==1:
+                		status[i]=1
+                		if cube[ind] not in func:
+                    
+                    			func=func+cube[ind]  #The implicants are appended to the func that is a string of alphabets representing the implicants present
+                                                                   in the function 
+    		print "status=",status
+    		status_zero= np.count_nonzero(status)
+    		print "status_zero=",status_zero
+    		zerc[ind]=0
+    		print "zerc=",zerc
+    		if status_zero==mnum:
+        	flag=1
+        print "THE MINIMUM COVER IS"
+	print func
+
+	start=2
+	cost=0
+
+
+	#----------Finding the Cost of the Cover
+        # It is always desired that the function be represented by as less implicants as possible.
+        # The cost function assigns a score to a cover by the number of implicants needed to cover it.
+	i=0
+	zerc=[0]*inum
+	for i in range(inum):
+    		for j in range(mnum):
+        		if bigf[j][i]==1:
+            			zerc[i]=zerc[i]+1
+
+	print zerc
+	cost=0.0
+
+	print "zerc=",zerc
+	for i in range(start,len(func)):
+    		imp=func[i]
+    		alp=cube.index(imp)
+    		count=zerc[alp]
+    		cost=(2/(count*1.0))+cost
+
+	done=np.zeros([inum,1],dtype=np.int)
+
+	print "cost=",cost
+
+	sbigf=np.zeros([mnum,inum],dtype=np.int)
+	check=np.zeros([inum,1],dtype=np.int)
+	n=np.count_nonzero(check)
+	i=0
+	col=range(0,inum)
+	
+	while n!=inum:
+       
+             temp=col[i]
+             done[i]=temp
+             check[i]=1
+             for j in range(mnum):
+                sbigf[j][i]=bigf[j][temp]
+                    
+             i=i+1
+             n=np.count_nonzero(check)
+
+
+
+            
+    
+
+  
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,261 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to Project 2’s:Minimum Cover documentation! &#8212; Project 2 1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-project-2-s-minimum-cover-documentation">
+<h1>Welcome to Project 2’s:Minimum Cover documentation!<a class="headerlink" href="#welcome-to-project-2-s-minimum-cover-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="code-for-finding-the-minimum-cover">
+<h2>Code for Finding the Minimum Cover<a class="headerlink" href="#code-for-finding-the-minimum-cover" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>This code is used to find the minimum cover of a function. The user first enters the number of minterms and implicants in the function.
+The  user is then asked to enter the minterm-implicant matrix format where the rows represent the minterms and the columnns represent the implicants.
+The entry in the matrix are either zero or one depending on whether a particular minterm belongs to that implicant.</div></blockquote>
+</div>
+<div class="section" id="algorithm">
+<h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>The function matrix is scanned to count the number of ones in each column.
+The maximum is picked and the corresponding implicant is picked to appear in the Minimum Cover.
+The minterms covered by that implicant are noted.
+The second maximum column is chosen such that corresponding implicants contains minterms that haven’t been covered yet.
+And it goes on..</div></blockquote>
+</div>
+<div class="section" id="test-cases">
+<h2>Test Cases<a class="headerlink" href="#test-cases" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Can be used for any number of minterms and implicants</li>
+<li><dl class="first docutils">
+<dt>Some sample function matrices:</dt>
+<dd>&gt;&gt;[[1,0,0],[0,1,0],[0,0,1]]
+&gt;&gt;[[1,0,0],[1,1,0],[0,1,1]]</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+<div class="highlight-Python"><div class="highlight"><pre><span></span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+ <span class="kn">import</span> <span class="nn">math</span>
+ <span class="kn">import</span> <span class="nn">string</span>
+ <span class="kn">import</span> <span class="nn">copy</span>
+ <span class="kn">import</span> <span class="nn">random</span>
+
+ <span class="c1">#----------Obtaining the table from the user----------</span>
+
+ <span class="n">mnum</span><span class="o">=</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter the number of minterms&quot;</span><span class="p">)</span>
+
+ <span class="n">inum</span><span class="o">=</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter the number of implicants&quot;</span><span class="p">)</span>
+ <span class="k">print</span> <span class="s2">&quot;Start entering the table.The table should be such that the columns represent the implicants and the rows the minterms&quot;</span>
+ <span class="n">bigf</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">mnum</span><span class="p">,</span><span class="n">inum</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+ <span class="n">bigf</span><span class="o">=</span><span class="nb">input</span><span class="p">()</span> <span class="c1">#bigf is the table that the user inputs</span>
+ <span class="n">r</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">bigf</span><span class="p">)</span>
+ <span class="c1">#-----------------ERROR HANDLING:If the user enters the table that has dimensions greater than the one they entered, it isn&#39;t considered---------</span>
+ <span class="k">if</span> <span class="n">r</span><span class="o">&gt;</span><span class="n">mnum</span><span class="p">:</span>
+         <span class="k">print</span> <span class="s2">&quot;The number of minterms entered exceeds the number of minterms entered in the beginning. Hence these won&#39;t be considered for processing&quot;</span>
+ <span class="k">print</span> <span class="n">r</span>
+ <span class="n">num_columns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">bigf</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+ <span class="k">if</span> <span class="n">r</span><span class="o">&gt;</span><span class="n">mnum</span><span class="p">:</span>
+         <span class="k">print</span> <span class="s2">&quot;The number of implicants entered exceeds the number of implicants entered in the beginning. Hence these won&#39;t be considered for processing&quot;</span>
+ <span class="k">print</span> <span class="s2">&quot;The table that is going to be considered&quot;</span>
+ <span class="n">bif</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="n">inum</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mnum</span><span class="p">):</span>
+         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inum</span><span class="p">):</span>
+                 <span class="n">bif</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">=</span> <span class="n">bigf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+         <span class="k">print</span> <span class="n">bif</span>
+
+
+ <span class="c1">#---------To find the number of ones occuring in each column------------------</span>
+ <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+
+ <span class="n">zerc</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">inum</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inum</span><span class="p">):</span>
+         <span class="n">j</span><span class="o">=</span><span class="mi">0</span>
+ <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mnum</span><span class="p">):</span>
+         <span class="k">if</span> <span class="n">bigf</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+         <span class="n">zerc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">zerc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>
+
+
+ <span class="k">print</span> <span class="n">zerc</span> <span class="c1"># Zerc contains the number of ones in each column</span>
+
+ <span class="c1">#---------To find the minimum cover------------</span>
+
+ <span class="n">status</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">mnum</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+ <span class="c1"># Status is the list that indicates whether some minterm is covered.</span>
+ <span class="c1"># Has entry in the form of zeroes and ones.</span>
+ <span class="n">sel</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">mnum</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+ <span class="n">flag</span><span class="o">=</span><span class="mi">0</span>
+
+ <span class="n">cop</span><span class="o">=</span><span class="n">zerc</span>
+ <span class="n">s</span><span class="o">=</span><span class="n">zerc</span>
+ <span class="k">print</span> <span class="s2">&quot;zerc=&quot;</span><span class="p">,</span><span class="n">zerc</span>
+ <span class="n">func</span><span class="o">=</span><span class="s2">&quot;f=&quot;</span>
+ <span class="n">cube</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span><span class="o">*</span><span class="n">inum</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inum</span><span class="p">):</span>
+         <span class="n">cube</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">string</span><span class="o">.</span><span class="n">lowercase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1"># Storing the literals in cube [i]</span>
+
+<span class="c1"># While displaying the minimum cover, its displayed in the form of alphabets(a,b,c..) for better user readablity</span>
+
+ <span class="k">while</span> <span class="n">flag</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+
+
+         <span class="n">temp</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">cop</span><span class="p">)</span>
+         <span class="n">ind</span><span class="o">=</span><span class="n">zerc</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+
+         <span class="k">print</span> <span class="n">temp</span>
+         <span class="k">print</span> <span class="n">ind</span>
+
+         <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+         <span class="n">cover</span><span class="o">=</span><span class="mi">0</span>
+         <span class="n">k</span><span class="o">=</span><span class="mi">0</span>
+
+         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mnum</span><span class="p">):</span>
+                 <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
+
+                 <span class="n">cover</span><span class="o">=</span><span class="mi">1</span>
+                 <span class="k">if</span> <span class="n">cover</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                         <span class="k">if</span> <span class="n">bigf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                         <span class="n">status</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+                         <span class="k">if</span> <span class="n">cube</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">func</span><span class="p">:</span>
+
+                                 <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="o">+</span><span class="n">cube</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>  <span class="c1">#The implicants are appended to the func that is a string of alphabets representing the implicants present</span>
+                                                            <span class="ow">in</span> <span class="n">the</span> <span class="n">function</span>
+         <span class="k">print</span> <span class="s2">&quot;status=&quot;</span><span class="p">,</span><span class="n">status</span>
+         <span class="n">status_zero</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+         <span class="k">print</span> <span class="s2">&quot;status_zero=&quot;</span><span class="p">,</span><span class="n">status_zero</span>
+         <span class="n">zerc</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+         <span class="k">print</span> <span class="s2">&quot;zerc=&quot;</span><span class="p">,</span><span class="n">zerc</span>
+         <span class="k">if</span> <span class="n">status_zero</span><span class="o">==</span><span class="n">mnum</span><span class="p">:</span>
+         <span class="n">flag</span><span class="o">=</span><span class="mi">1</span>
+ <span class="k">print</span> <span class="s2">&quot;THE MINIMUM COVER IS&quot;</span>
+ <span class="k">print</span> <span class="n">func</span>
+
+ <span class="n">start</span><span class="o">=</span><span class="mi">2</span>
+ <span class="n">cost</span><span class="o">=</span><span class="mi">0</span>
+
+
+ <span class="c1">#----------Finding the Cost of the Cover</span>
+ <span class="c1"># It is always desired that the function be represented by as less implicants as possible.</span>
+ <span class="c1"># The cost function assigns a score to a cover by the number of implicants needed to cover it.</span>
+ <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+ <span class="n">zerc</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">inum</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inum</span><span class="p">):</span>
+         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mnum</span><span class="p">):</span>
+                 <span class="k">if</span> <span class="n">bigf</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                         <span class="n">zerc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">zerc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>
+
+ <span class="k">print</span> <span class="n">zerc</span>
+ <span class="n">cost</span><span class="o">=</span><span class="mf">0.0</span>
+
+ <span class="k">print</span> <span class="s2">&quot;zerc=&quot;</span><span class="p">,</span><span class="n">zerc</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">func</span><span class="p">)):</span>
+         <span class="n">imp</span><span class="o">=</span><span class="n">func</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+         <span class="n">alp</span><span class="o">=</span><span class="n">cube</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">imp</span><span class="p">)</span>
+         <span class="n">count</span><span class="o">=</span><span class="n">zerc</span><span class="p">[</span><span class="n">alp</span><span class="p">]</span>
+         <span class="n">cost</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">count</span><span class="o">*</span><span class="mf">1.0</span><span class="p">))</span><span class="o">+</span><span class="n">cost</span>
+
+ <span class="n">done</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">inum</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+ <span class="k">print</span> <span class="s2">&quot;cost=&quot;</span><span class="p">,</span><span class="n">cost</span>
+
+ <span class="n">sbigf</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">mnum</span><span class="p">,</span><span class="n">inum</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+ <span class="n">check</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">inum</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+ <span class="n">n</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">check</span><span class="p">)</span>
+ <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+ <span class="n">col</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">inum</span><span class="p">)</span>
+
+ <span class="k">while</span> <span class="n">n</span><span class="o">!=</span><span class="n">inum</span><span class="p">:</span>
+
+      <span class="n">temp</span><span class="o">=</span><span class="n">col</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      <span class="n">done</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">temp</span>
+      <span class="n">check</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mnum</span><span class="p">):</span>
+         <span class="n">sbigf</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">bigf</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">temp</span><span class="p">]</span>
+
+      <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+      <span class="n">n</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">check</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Mohita Chowdhury,Naksha Shanbhag,Theekshna Kotian Subbalakshmi.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
