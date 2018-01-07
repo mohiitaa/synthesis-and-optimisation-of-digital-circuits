@@ -1,0 +1,525 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to SDC Project 1’s documentation! &#8212; SDC Project 1 1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-sdc-project-1-s-documentation">
+<h1>Welcome to SDC Project 1’s documentation!<a class="headerlink" href="#welcome-to-sdc-project-1-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="code-for-obdd-robdd-and-ite">
+<h2>Code for OBDD, ROBDD and ite<a class="headerlink" href="#code-for-obdd-robdd-and-ite" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="note-the-code-also-does-error-handling">
+<h3>NOTE : The code also does ERROR HANDLING<a class="headerlink" href="#note-the-code-also-does-error-handling" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Enter the function</li>
+<li>If you want to quit press “q”, else specify the splitting order</li>
+<li>If you didn’t quit,output(OBDD leaf node values,ROBDD tree and ITE expression) appears for the given splittng order.</li>
+<li>Go to step 2.</li>
+</ul>
+<p>Hence you can see output FOR ANY splitting order you want in ONE RUNNING OF THE CODE.</p>
+</div>
+<div class="section" id="test-cases">
+<h3>Test Cases:<a class="headerlink" href="#test-cases" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>All null cubes.</li>
+<li>A tautology.</li>
+<li>PCN=[[‘01’,‘01’,‘01’],[‘10’,‘01’,‘01’]]–&gt;gives an asymmetric tree</li>
+<li>PCN=[[‘01’,‘01’,‘01’],[‘10’,‘10’,‘10’]]–&gt;gives a symmetric tree</li>
+<li>PCN=[[‘01’,‘11’,‘11’]]–&gt;Function dependent on a single variable</li>
+</ul>
+</div>
+<div class="section" id="code">
+<h3>Code<a class="headerlink" href="#code" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">graphviz</span> <span class="kn">as</span> <span class="nn">gv</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="c1">#--------------------------------a function for ERROR HANDLING in user input--------------------------</span>
+
+<span class="k">def</span> <span class="nf">checkinput</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span><span class="n">varr</span><span class="p">):</span>
+                <span class="n">ans</span> <span class="o">=</span> <span class="s2">&quot;xx&quot;</span>
+                <span class="k">while</span> <span class="n">ans</span><span class="o">==</span><span class="s2">&quot;xx&quot;</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">ans</span> <span class="o">=</span> <span class="nb">input</span><span class="p">()</span>
+                                        <span class="k">if</span> <span class="n">ip</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                                                        <span class="k">if</span> <span class="n">ans</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;11&quot;</span><span class="p">,</span><span class="s2">&quot;01&quot;</span><span class="p">,</span><span class="s2">&quot;10&quot;</span><span class="p">,</span><span class="s2">&quot;00&quot;</span><span class="p">):</span>  <span class="c1">#-------takes in only PCN notation</span>
+                                                                <span class="k">raise</span> <span class="ne">ValueError</span>
+                                        <span class="k">elif</span> <span class="n">ip</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                                                        <span class="k">if</span> <span class="n">ans</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">varr</span><span class="p">:</span>  <span class="c1">#----checking if variables specified for splitting order are present in original variable list</span>
+                                                                        <span class="k">raise</span> <span class="ne">ValueError</span>
+                                        <span class="k">elif</span> <span class="n">ip</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                                                        <span class="nb">int</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>   <span class="c1">#--------takes in only integers</span>
+
+                        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                                        <span class="n">ans</span> <span class="o">=</span> <span class="s2">&quot;xx&quot;</span>
+                                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;That&#39;s not a valid input! Please enter that part again.&quot;</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">ans</span>
+
+
+<span class="c1">#----------------------------a shortcut function for and-ing the cubes-------------------------------</span>
+
+<span class="k">def</span> <span class="nf">Op_and</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span><span class="n">c_mat</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">c_mat</span> <span class="o">==</span> <span class="s2">&quot;11&quot;</span> <span class="ow">or</span> <span class="n">c_mat</span> <span class="o">==</span> <span class="n">cp</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;11&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;00&quot;</span>
+
+        <span class="k">return</span> <span class="n">s</span>
+
+<span class="c1">#-------------------------------------------------------------------------------------------------------</span>
+
+<span class="c1">#------------------------------The recursion function for OBDD------------------------------------------</span>
+<span class="n">var3</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">OBDD</span><span class="p">(</span><span class="n">reclist</span><span class="p">,</span><span class="n">index</span><span class="p">,</span><span class="n">col</span><span class="p">,</span><span class="n">ar</span><span class="p">,</span><span class="n">var3</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">expp</span>
+        <span class="n">Main</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reclist</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+        <span class="c1">#print(&quot;index=&quot;,index,&quot;col=&quot;,col,&quot;\n \n&quot;)</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+                <span class="c1">#print (&quot;Entered base condition&quot;)</span>
+                <span class="n">test</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;11&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="n">Main</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">test</span><span class="p">:</span>
+                        <span class="n">ar</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="c1">#---------for ite expression------------</span>
+                        <span class="n">expp</span><span class="o">=</span><span class="n">expp</span><span class="o">+</span><span class="s2">&quot;,1&quot;</span>
+                        <span class="c1">#-----pop the stored cubes of this level since they are no more needed</span>
+                        <span class="n">reclist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                        <span class="k">return</span>
+                <span class="k">elif</span> <span class="s2">&quot;00&quot;</span> <span class="ow">in</span> <span class="n">Main</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="n">ar</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="c1">#---------for ite expression------------</span>
+                        <span class="n">expp</span><span class="o">=</span><span class="n">expp</span><span class="o">+</span><span class="s2">&quot;,0&quot;</span>
+                        <span class="c1">#------pop the stored cubes of this level since they are no more needed</span>
+                        <span class="n">reclist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                        <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+                <span class="n">Left</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reclist</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+                <span class="c1">#-----and operation for left child</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+                        <span class="n">Left</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">Op_and</span><span class="p">(</span><span class="s2">&quot;10&quot;</span><span class="p">,</span><span class="n">Main</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+
+
+                <span class="n">lc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Left</span><span class="p">)</span>
+                <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+
+                <span class="c1">#-----removing null cubes</span>
+                <span class="k">if</span> <span class="n">lc</span><span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">while</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">lc</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="s2">&quot;00&quot;</span> <span class="ow">in</span> <span class="n">Left</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                                        <span class="n">Left</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                        <span class="n">lc</span> <span class="o">=</span> <span class="n">lc</span><span class="o">-</span><span class="mi">1</span>
+                                        <span class="k">if</span> <span class="n">lc</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                                                <span class="k">break</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+
+                <span class="c1">#---------for ite expression------------</span>
+                <span class="k">if</span> <span class="n">index</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                        <span class="n">expp</span><span class="o">=</span><span class="n">expp</span><span class="o">+</span><span class="s2">&quot;,ite(&quot;</span><span class="o">+</span><span class="n">var3</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                        <span class="n">expp</span><span class="o">=</span><span class="n">expp</span><span class="o">+</span><span class="s2">&quot;ite(&quot;</span><span class="o">+</span><span class="n">var3</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+                <span class="c1">#------appending the cubes of this level to reclist</span>
+                <span class="n">reclist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Left</span><span class="p">)</span>
+
+                <span class="c1">#-----calling the recursion for left child</span>
+                <span class="n">OBDD</span><span class="p">(</span><span class="n">reclist</span><span class="p">,</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">lc</span><span class="p">,</span><span class="n">ar</span><span class="p">,</span><span class="n">var3</span><span class="p">)</span>
+
+
+                <span class="n">Right</span><span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reclist</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+                <span class="c1">#-----and operation for right child</span>
+                <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+                        <span class="n">Right</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">Op_and</span><span class="p">(</span><span class="s2">&quot;01&quot;</span><span class="p">,</span><span class="n">Main</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+
+                <span class="n">lc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Right</span><span class="p">)</span>
+                <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+
+                <span class="c1">#-----removing null cubes</span>
+                <span class="k">if</span> <span class="n">lc</span><span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">while</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">lc</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="s2">&quot;00&quot;</span> <span class="ow">in</span> <span class="n">Right</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                                        <span class="n">Right</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                        <span class="n">lc</span> <span class="o">=</span> <span class="n">lc</span><span class="o">-</span><span class="mi">1</span>
+                                        <span class="k">if</span> <span class="n">lc</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                                                <span class="k">break</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+
+                <span class="c1">#------appending the cubes of this level to reclist</span>
+                <span class="n">reclist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Right</span><span class="p">)</span>
+
+                <span class="c1">#------calling the recursion for right child</span>
+                <span class="n">OBDD</span><span class="p">(</span><span class="n">reclist</span><span class="p">,</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">lc</span><span class="p">,</span><span class="n">ar</span><span class="p">,</span><span class="n">var3</span><span class="p">)</span>
+
+                <span class="c1">#---------for ite expression------------</span>
+                <span class="n">expp</span><span class="o">=</span><span class="n">expp</span><span class="o">+</span><span class="s2">&quot;)&quot;</span>
+
+                <span class="c1">#------pop the stored cubes of this level since they are no more needed</span>
+                <span class="n">reclist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+                <span class="c1">#print(&quot;end&quot;)</span>
+                <span class="k">return</span>
+
+
+<span class="c1">#-----------------------------------------------------------------------------------------------------</span>
+
+<span class="c1">#-------------------------------------------ROBDD PART------------------------------------------------</span>
+
+<span class="k">def</span> <span class="nf">ROBDD</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">var</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">tt</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">no</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
+        <span class="n">k</span><span class="o">=</span><span class="mi">2</span>
+        <span class="n">f</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">foundindic</span><span class="o">=</span><span class="mi">0</span>
+
+        <span class="n">dic</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+
+        <span class="c1">#------------Robdd is made using the leaf node array got from the OBDD function</span>
+
+        <span class="k">while</span> <span class="n">p</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">no</span><span class="o">=</span><span class="n">no</span><span class="o">-</span><span class="mi">1</span>
+                <span class="n">uff</span><span class="o">=</span><span class="mi">0</span>
+                <span class="n">f</span><span class="o">=</span><span class="mi">0</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
+                        <span class="n">foundindic</span><span class="o">=</span><span class="mi">0</span>
+                        <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">p</span><span class="o">!=</span><span class="n">tt</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">p</span><span class="o">!=</span><span class="n">tt</span><span class="p">:</span>
+                                        <span class="c1">#-----if left and right child are both 0 or 1,parent id will be 0 or 1 respectively</span>
+                                        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+                                                <span class="c1">#print(&quot;same id&quot;)</span>
+                                                <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                                <span class="k">elif</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                                <span class="n">a</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                                <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="o">+</span><span class="mi">1</span>
+                                                <span class="n">foundindic</span><span class="o">=</span><span class="mi">1</span>
+
+                                        <span class="c1">#-----checking if other ids have same children(non leaf node levels)</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dic</span><span class="p">)</span><span class="o">-</span><span class="n">uff</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">dic</span><span class="p">),</span><span class="mi">1</span><span class="p">):</span>
+                                                        <span class="k">if</span> <span class="n">dic</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">dic</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+                                                                <span class="c1">#print(&quot;old id non-last level&quot;)</span>
+                                                                <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="n">dic</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">],</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                                                <span class="n">a</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                                                                <span class="n">foundindic</span><span class="o">=</span><span class="mi">1</span>
+                                                                <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="o">+</span><span class="mi">1</span>
+                                                                <span class="k">break</span>
+
+                                <span class="c1">#-----checking if other ids have same children(for leaf node level)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dic</span><span class="p">)</span><span class="o">-</span><span class="n">uff</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">dic</span><span class="p">),</span><span class="mi">1</span><span class="p">):</span>
+                                                <span class="k">if</span> <span class="n">dic</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">dic</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+                                                        <span class="c1">#print(&quot;old id last level&quot;)</span>
+                                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="n">dic</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">],</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                                        <span class="n">a</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                                                        <span class="n">foundindic</span><span class="o">=</span><span class="mi">1</span>
+                                                        <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="o">+</span><span class="mi">1</span>
+                                                        <span class="k">break</span>
+
+                                <span class="c1">#-------assigning new ids in case they aren&#39;t found in the old id list</span>
+                                <span class="k">if</span> <span class="n">foundindic</span><span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
+                                        <span class="c1">#print(&quot;new id&quot;)</span>
+                                        <span class="k">if</span> <span class="n">p</span><span class="o">==</span><span class="n">tt</span><span class="p">:</span>
+                                                <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                                <span class="k">elif</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                                <span class="k">else</span><span class="p">:</span>
+                                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="n">k</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                                        <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                                <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="n">k</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                                <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+
+                                        <span class="n">a</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">dic</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                                        <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="o">+</span><span class="mi">1</span>
+                                        <span class="n">foundindic</span><span class="o">=</span><span class="mi">0</span>
+
+                        <span class="k">else</span><span class="p">:</span>
+                                <span class="c1">#print(&quot;for first element&quot;)</span>
+                                <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                <span class="k">elif</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">dic</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="n">k</span><span class="p">,</span><span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;lev&#39;</span><span class="p">:</span><span class="n">var</span><span class="p">[</span><span class="n">no</span><span class="p">]})</span>
+                                        <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+                                <span class="n">a</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                                <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="o">+</span><span class="mi">1</span>
+
+                        <span class="n">uff</span><span class="o">=</span><span class="n">uff</span><span class="o">+</span><span class="mi">1</span>
+
+                <span class="n">p</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1">#print(&quot;dic=&quot;,dic)</span>
+        <span class="n">dic2</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">dic2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">dic</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1">#--------reducing the dictionary of ids such that there&#39;s only one element with a particular id</span>
+        <span class="c1">#--------it is done from top to bottom.Top variables are stored first in the dictionary list</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dic</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">just</span><span class="o">=</span><span class="mi">0</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">dic2</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">dic</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">j</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]:</span>
+                                <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                                <span class="n">just</span><span class="o">=</span><span class="n">just</span><span class="o">+</span><span class="mi">1</span>
+                <span class="k">if</span> <span class="n">just</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">dic2</span><span class="p">):</span>
+                        <span class="n">dic2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Reduced ROBDD dictionary of ids=&quot;</span><span class="p">,</span><span class="n">dic2</span><span class="p">,</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1">#----------------------------------------------------------------------------------------------------</span>
+
+<span class="c1">#------------------------------------------GRAPHVIZ PART---------------------------------------------</span>
+
+        <span class="n">rbd</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">Digraph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+
+        <span class="c1">#-----traversing the reduced dictionary</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">dic2</span><span class="p">),</span><span class="mi">1</span><span class="p">):</span>
+
+                <span class="c1">#------if left child = right child</span>
+                <span class="k">if</span> <span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dic2</span><span class="p">)</span><span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
+                                <span class="n">rbd</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                                <span class="n">rbd</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;lev&#39;</span><span class="p">],</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dic2</span><span class="p">)</span><span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
+                                <span class="n">rbd</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                                <span class="n">rbd</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;lev&#39;</span><span class="p">],</span><span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]:</span> <span class="c1">#----------ids other than 0 and 1</span>
+                        <span class="n">rbd</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;lev&#39;</span><span class="p">])</span>
+                        <span class="n">rbd</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="s1">&#39;1&#39;</span><span class="p">))</span>
+
+                <span class="c1">#------if left child not equal to right child</span>
+                <span class="k">else</span><span class="p">:</span>
+                        <span class="n">rbd</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;lev&#39;</span><span class="p">])</span>
+                        <span class="n">rbd</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;l&#39;</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+                        <span class="n">rbd</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="n">dic2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">rbd</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="s1">&#39;img/rbd&#39;</span><span class="p">,</span><span class="n">view</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span>
+
+
+
+<span class="c1">#---------------------------------------------------------------------------------------------------------</span>
+
+<span class="c1">#--------------------------------------------PROGRAM BEGINS-----------------------------------------------</span>
+
+<span class="n">expp</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+<span class="n">a</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+<span class="n">var1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="n">var2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="n">cp</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Enter the number of variables in the function:&quot;</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">checkinput</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">var1</span><span class="p">))</span> <span class="c1">#-----------calls checkinput function to take only valid inputs</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Enter the number of cubes in the function:&quot;</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">checkinput</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">var1</span><span class="p">))</span> <span class="c1">#-----------calls checkinput function to take only valid inputs</span>
+
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Enter the variables in the function&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="nb">input</span><span class="p">()</span>
+        <span class="n">var1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+<span class="n">dc</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">tautology</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">flag</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">lol</span><span class="o">=</span><span class="s2">&quot;00&quot;</span>
+<span class="n">cube</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;00&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Enter the cubes in PCN(in the entered variable order)&quot;</span><span class="p">)</span>
+
+<span class="c1">#This part takes input and removes null cubes and checks for don&#39;t care cubes Ex:[&#39;11&#39;,&#39;11&#39;,&#39;11&#39;]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">cube</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">flag</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">checkinput</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">var1</span><span class="p">)</span> <span class="c1">#-----------calls checkinput function to take only valid inputs</span>
+                <span class="k">if</span> <span class="n">cube</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">flag</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;11&quot;</span><span class="p">:</span>
+                        <span class="n">dc</span><span class="o">=</span><span class="n">dc</span><span class="o">+</span><span class="mi">1</span>
+                <span class="k">if</span> <span class="n">cube</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">flag</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;00&quot;</span><span class="p">:</span>
+<span class="c1">#      print(&quot;That was a redundant cube.Enter the next cube.&quot;)</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                                <span class="n">lol</span><span class="o">=</span><span class="n">checkinput</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">var1</span><span class="p">)</span> <span class="c1">#-----------calls checkinput function to take only valid inputs</span>
+                        <span class="n">cube</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="n">flag</span><span class="p">)</span>
+                        <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="o">+</span><span class="mi">1</span>
+                        <span class="n">dc</span><span class="o">=</span><span class="mi">0</span>
+                        <span class="k">break</span>
+        <span class="k">if</span> <span class="n">dc</span><span class="o">==</span><span class="n">n</span><span class="p">:</span>
+                <span class="n">cube</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="n">flag</span><span class="p">)</span>
+                <span class="n">tautology</span><span class="o">=</span><span class="n">tautology</span><span class="o">+</span><span class="mi">1</span>
+                <span class="n">dc</span><span class="o">=</span><span class="mi">0</span>
+                <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">dc</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
+
+
+<span class="n">var2</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">var1</span><span class="p">)</span>
+
+<span class="c1">#--------our new c is the number of cubes left after removing null and don&#39;t care cubes</span>
+<span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="o">-</span><span class="n">flag</span>
+<span class="n">quit</span><span class="o">=</span><span class="s1">&#39;g&#39;</span>
+
+<span class="k">if</span> <span class="n">tautology</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;The entered function is a tautology&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="nb">len</span><span class="p">(</span><span class="n">var1</span><span class="p">)):</span>
+                <span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">quit</span><span class="o">!=</span><span class="s1">&#39;q&#39;</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">------If you want to quit press (q) else press any other letter&quot;</span><span class="p">)</span>
+                <span class="n">quit</span><span class="o">=</span><span class="nb">input</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">quit</span><span class="o">!=</span><span class="s1">&#39;q&#39;</span><span class="p">:</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Enter the variables in the order you want to split it&quot;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                                <span class="n">var2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">checkinput</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">var1</span><span class="p">)</span>  <span class="c1">#-----------calls checkinput function to take only valid inputs</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">####################</span><span class="se">\n</span><span class="s2">Function=ite(&quot;</span><span class="o">+</span><span class="n">var2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;,1,1)</span><span class="se">\n</span><span class="s2">####################&quot;</span><span class="p">)</span>
+                        <span class="n">ROBDD</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">var2</span><span class="p">)</span>
+
+
+<span class="k">elif</span> <span class="n">c</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;All the entered cubes are Null&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="nb">len</span><span class="p">(</span><span class="n">var1</span><span class="p">)):</span>
+                <span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">quit</span><span class="o">!=</span><span class="s1">&#39;q&#39;</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-------If you want to quit press (q) else press any other letter&quot;</span><span class="p">)</span>
+                <span class="n">quit</span><span class="o">=</span><span class="nb">input</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">quit</span><span class="o">!=</span><span class="s1">&#39;q&#39;</span><span class="p">:</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Enter the variables in the order you want to split it&quot;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                                <span class="n">var2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span> <span class="nb">input</span><span class="p">()</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">####################</span><span class="se">\n</span><span class="s2">Function=ite(&quot;</span><span class="o">+</span><span class="n">var2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;,0,0)</span><span class="se">\n</span><span class="s2">####################&quot;</span><span class="p">)</span>
+                        <span class="n">ROBDD</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">var2</span><span class="p">)</span>
+
+<span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;reduced input:&quot;</span><span class="p">,</span><span class="n">cube</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">quit</span><span class="o">!=</span><span class="s1">&#39;q&#39;</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">------If you want to quit press (q) else press any other letter&quot;</span><span class="p">)</span>
+                <span class="n">quit</span><span class="o">=</span><span class="nb">input</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">quit</span><span class="o">!=</span><span class="s1">&#39;q&#39;</span><span class="p">:</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Enter the variables in the order you want to split it&quot;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                                <span class="n">var2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">input</span><span class="p">()</span>
+
+                        <span class="c1">#----------takes care of the change in splitting order</span>
+                        <span class="n">cp</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">var2</span><span class="p">)):</span>
+                                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">var1</span><span class="p">)):</span>
+                                        <span class="k">if</span> <span class="n">var2</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">==</span><span class="n">var1</span><span class="p">[</span><span class="n">y</span><span class="p">]:</span>
+                                                <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cube</span><span class="p">)):</span>
+                                                        <span class="n">cp</span><span class="p">[</span><span class="n">z</span><span class="p">][</span><span class="n">x</span><span class="p">]</span><span class="o">=</span><span class="n">cube</span><span class="p">[</span><span class="n">z</span><span class="p">][</span><span class="n">y</span><span class="p">]</span>
+                                                <span class="k">break</span>
+
+                        <span class="n">rec</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+                        <span class="c1">#------rec is a list of list of lists to store cubes at different levels</span>
+                        <span class="n">rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cp</span><span class="p">)</span>
+                        <span class="n">func</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                        <span class="n">expp</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+
+                        <span class="n">OBDD</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">func</span><span class="p">,</span><span class="n">var2</span><span class="p">)</span>
+
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Leaf node values in order=&quot;</span><span class="p">,</span><span class="n">func</span><span class="p">)</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Number of leaf nodes=&quot;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
+                        <span class="n">a</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+                        <span class="c1">#----------printing the ite expression</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">####################</span><span class="se">\n</span><span class="s2">Function=&quot;</span><span class="p">,</span><span class="n">expp</span><span class="p">,</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">####################&quot;</span><span class="p">)</span>
+
+                        <span class="c1">#-------calling robdd function which also does the graphviz part</span>
+                        <span class="n">ROBDD</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">var2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Theekshna Kotian, Mohita Chowdhury, N. Subbalakshmi & Naksha Shanbhag.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
